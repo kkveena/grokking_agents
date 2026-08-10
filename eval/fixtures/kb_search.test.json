@@ -1,0 +1,35 @@
+{
+  "eval_set_id": "kb_search_set",
+  "name": "kb_search",
+  "description": "Happy path: the supervisor delegates to kb_agent, which calls search_article and answers with a citation. The deterministic gate scores this with the `delegated_and_retrieved` custom metric (trajectory_metrics.py), which checks only the tool NAMES — so the `query` arg and `final_response` below are ILLUSTRATIVE (the model generates a different query each run, and answer quality is the judge suite's job). See eval/README.md.",
+  "eval_cases": [
+    {
+      "eval_id": "kb_delegate_search_answer",
+      "conversation": [
+        {
+          "invocation_id": "inv-0001",
+          "user_content": {
+            "parts": [{ "text": "What does the Stanford HAI report say about the state of AI agents?" }],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [{ "text": "According to the internal documentation (Stanford HAI report 2026), agentic systems that plan and call tools moved from research demos into production, and multi-agent orchestration with tool-use evaluation became standard engineering practice." }],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              { "name": "transfer_to_agent", "args": { "agent_name": "kb_agent" } },
+              { "name": "search_article", "args": { "query": "state of AI agents Stanford HAI report" } }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "research_assistant",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    }
+  ]
+}

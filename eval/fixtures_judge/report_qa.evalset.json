@@ -1,0 +1,191 @@
+{
+  "eval_set_id": "report_qa_set",
+  "name": "AI Index 2026 \u2014 report QA",
+  "description": "Grounded QA over the AI Index 2026 corpus ingested into Qdrant: 4 happy-path questions spanning the report (capability frontier, the US-China gap, healthcare, responsible AI), scored by the LLM-judge criteria in test_config.json (final_response_match_v2 + hallucinations_v1). Kept deliberately small so routine judge runs do not exhaust API/quota.",
+  "eval_cases": [
+    {
+      "eval_id": "capability_frontier",
+      "conversation": [
+        {
+          "invocation_id": "capability_frontier-1",
+          "user_content": {
+            "parts": [
+              {
+                "text": "What does the report say about the state of AI capability in 2025?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "According to the AI Index 2026 report, AI capability is accelerating rather than plateauing: industry produced over 90% of notable frontier models in 2025, and several now meet or exceed human baselines on PhD-level science questions, multimodal reasoning, and competition mathematics."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "transfer_to_agent",
+                "args": {
+                  "agent_name": "kb_agent"
+                }
+              },
+              {
+                "name": "search_article",
+                "args": {
+                  "query": "state of AI capability frontier models 2025"
+                }
+              }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "research_assistant",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    },
+    {
+      "eval_id": "us_china_gap",
+      "conversation": [
+        {
+          "invocation_id": "us_china_gap-1",
+          "user_content": {
+            "parts": [
+              {
+                "text": "What does the report say about the gap between U.S. and Chinese AI models?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The report says the U.S.\u2013China model performance gap has effectively closed. The two have traded the lead since early 2025 \u2014 DeepSeek-R1 briefly matched the top U.S. model in February 2025 \u2014 and as of March 2026 the leading U.S. (Anthropic) model leads by just 2.7%."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "transfer_to_agent",
+                "args": {
+                  "agent_name": "kb_agent"
+                }
+              },
+              {
+                "name": "search_article",
+                "args": {
+                  "query": "US China AI model performance gap"
+                }
+              }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "research_assistant",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    },
+    {
+      "eval_id": "healthcare",
+      "conversation": [
+        {
+          "invocation_id": "healthcare-1",
+          "user_content": {
+            "parts": [
+              {
+                "text": "How is AI affecting clinical care according to the report?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "The report says AI is transforming clinical care but rigorous evidence is still limited. AI tools that auto-generate clinical notes saw substantial adoption in 2025, with physicians reporting up to 83% less time spent writing notes."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "transfer_to_agent",
+                "args": {
+                  "agent_name": "kb_agent"
+                }
+              },
+              {
+                "name": "search_article",
+                "args": {
+                  "query": "AI clinical care notes physicians time"
+                }
+              }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "research_assistant",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    },
+    {
+      "eval_id": "responsible_ai",
+      "conversation": [
+        {
+          "invocation_id": "responsible_ai-1",
+          "user_content": {
+            "parts": [
+              {
+                "text": "Is responsible AI keeping pace with AI capability?"
+              }
+            ],
+            "role": "user"
+          },
+          "final_response": {
+            "parts": [
+              {
+                "text": "No \u2014 the report finds responsible AI is not keeping pace with capability: reporting on responsible-AI benchmarks remains spotty even though almost all frontier developers report capability benchmarks, and documented AI incidents rose sharply."
+              }
+            ],
+            "role": "model"
+          },
+          "intermediate_data": {
+            "tool_uses": [
+              {
+                "name": "transfer_to_agent",
+                "args": {
+                  "agent_name": "kb_agent"
+                }
+              },
+              {
+                "name": "search_article",
+                "args": {
+                  "query": "responsible AI benchmarks incidents rising"
+                }
+              }
+            ],
+            "intermediate_responses": []
+          }
+        }
+      ],
+      "session_input": {
+        "app_name": "research_assistant",
+        "user_id": "eval_user",
+        "state": {}
+      }
+    }
+  ]
+}

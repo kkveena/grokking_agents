@@ -1,0 +1,89 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_USER=${DB_USER:-app}
+      - POSTGRES_PASSWORD=${DB_PASS:-password}
+      - POSTGRES_DB=sessions
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app} -d sessions"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  agent:
+    build:
+      context: ./agent
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      mcp:
+        condition: service_started
+      phoenix:
+        condition: service_started
+    environment:
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - EXAAI_API_KEY=${EXAAI_API_KEY}
+      - SESSIONS_DB_URL=postgresql+asyncpg://${DB_USER:-app}:${DB_PASS:-password}@db:5432/sessions
+      - MCP_SERVER_URL=http://mcp:3000/mcp
+      - PORT=8080
+      # Observability (Week 5) — ON by default locally, exporting to the in-network Phoenix UI.
+      # It's the same env toggle production uses (just pointed at Langfuse there): set
+      # OBSERVABILITY_ENABLED=false in your .env to run the stack without tracing.
+      - OBSERVABILITY_ENABLED=${OBSERVABILITY_ENABLED:-true}
+      - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-article-assistant-local}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://phoenix:6006/v1/traces}
+      - OTEL_EXPORTER_OTLP_HEADERS=${OTEL_EXPORTER_OTLP_HEADERS:-}
+    ports:
+      - "8080:8080"
+
+  mcp:
+    build:
+      context: ./mcp
+      dockerfile: Dockerfile
+    depends_on:
+      ingestion:
+        condition: service_completed_successfully
+      qdrant:
+        condition: service_healthy
+    environment:
+      - COHERE_API_KEY=${COHERE_API_KEY}
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-week4docs}
+      - PORT=3000
+    ports:
+      - "3000:3000"
+
+  ingestion:
+    build:
+      context: ./ingestion
+      dockerfile: Dockerfile
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - QDRANT_API_KEY=
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION:-week4docs}
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c ':> /dev/tcp/127.0.0.1/6333' || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Local trace UI (Week 5). Starts with the stack by default, so traces are there without extra steps.
+  # Same Docker network, so the agent reaches it at http://phoenix:6006/v1/traces. UI on localhost:6006.
+  # (Don't want it? `OBSERVABILITY_ENABLED=false docker compose up` runs the app without exporting.)
+  phoenix:
+    image: arizephoenix/phoenix:latest
+    ports:
+      - "6006:6006"   # UI + OTLP/HTTP trace collector
